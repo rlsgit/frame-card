@@ -10,7 +10,8 @@ import { ignoreTextfieldFiles } from './elements/ignore/textfield';
 import { ignoreSelectFiles } from './elements/ignore/select';
 import { ignoreSwitchFiles } from './elements/ignore/switch';
 
-const dev = process.env.ROLLUP_WATCH;
+const __DEV__ = process.env.ROLLUP_DEV;
+const __SRV__ = process.env.ROLLUP_SRV;
 
 const serveopts = {
   contentBase: ['./dist'],
@@ -30,8 +31,8 @@ const plugins = [
   babel({
     exclude: 'node_modules/**',
   }),
-  dev && serve(serveopts),
-  !dev && terser(),
+  __SRV__ && serve(serveopts),
+  !__DEV__ && terser(),
   ignore({
     files: [...ignoreTextfieldFiles, ...ignoreSelectFiles, ...ignoreSwitchFiles].map((file) => require.resolve(file)),
   }),
@@ -39,7 +40,7 @@ const plugins = [
 
 export default [
   {
-    input: 'src/boilerplate-card.ts',
+    input: 'src/frame-card.ts',
     output: {
       dir: 'dist',
       format: 'es',
