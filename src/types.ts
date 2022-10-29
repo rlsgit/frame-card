@@ -11,6 +11,8 @@ declare global {
 export interface FrameCardConfig extends LovelaceCardConfig {
   type: string;
   name?: string;
-  label?: string;
+  title?: string;
+  style?: string;
+  titleStyle?: string;
   card: LovelaceCardConfig;
 }

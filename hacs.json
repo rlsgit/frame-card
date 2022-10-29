@@ -1,5 +1,6 @@
 {
-    "name": "Frame Card",
-    "render_readme": true,
-    "filename": "frame-card.js"
+  "name": "frame-card",
+  "content_in_root": false,
+  "render_readme": true,
+  "filename": "frame-card.js"
 }

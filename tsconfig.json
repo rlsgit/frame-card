@@ -8,6 +8,11 @@
       "dom",
       "dom.iterable"
     ],
+    "plugins": [
+      {
+        "name": "ts-lit-plugin"
+      }
+    ],
     "noEmit": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
@@ -16,6 +21,11 @@
     "noImplicitAny": false,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "experimentalDecorators": true
-  }
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "allowSyntheticDefaultImports": true,
+  },
+  "include": [
+    "src/*"
+  ]
 }
