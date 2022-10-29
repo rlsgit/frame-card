@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { LitElement, html, TemplateResult, css, CSSResultGroup } from 'lit';
-import { HomeAssistant, fireEvent, LovelaceCardEditor, LovelaceCard } from 'custom-card-helpers';
+import { HomeAssistant, fireEvent, LovelaceCardEditor, LovelaceCardConfig } from 'custom-card-helpers';
 
 import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
 import { FrameCardConfig } from './types';
@@ -49,7 +49,7 @@ export class FrameCardEditor extends ScopedRegistryHost(LitElement) implements L
     return this._config?.label || '';
   }
 
-  get _card(): LovelaceCard | undefined{
+  get _card(): LovelaceCardConfig | undefined{
     return this._config?.card;
   }
 

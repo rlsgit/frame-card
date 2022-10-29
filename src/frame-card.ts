@@ -6,6 +6,10 @@ import {
   hasConfigOrEntityChanged,
   LovelaceCardEditor,
   getLovelace,
+  LovelaceCard,
+  LovelaceCardConfig,
+  createThing,
+  fireEvent,
 } from 'custom-card-helpers'; // This is a community maintained npm module with common helper functions/types. https://github.com/custom-cards/custom-card-helpers
 
 import type { FrameCardConfig } from './types';
@@ -27,10 +31,21 @@ console.info(
   description: 'A card wrapper with a frame.',
 });
 
+let helpers = (window as any).cardHelpers;
+const helperPromise = new Promise(async (resolve) => {
+  if (helpers) resolve(helpers);
+  if ((window as any).loadCardHelpers) {
+    helpers = await (window as any).loadCardHelpers();
+    (window as any).cardHelpers = helpers;
+    resolve(helpers);
+  }
+});
+
 // TODO Name your custom element
 @customElement('frame-card')
 export class FrameCard extends LitElement {
   private _el: TemplateResult | undefined;
+  private _card: LovelaceCard | undefined;
 
   constructor() {
     super();
@@ -47,11 +62,21 @@ export class FrameCard extends LitElement {
     return {};
   }
 
-  // TODO Add any properities that should cause your element to re-render here
-  // https://lit.dev/docs/components/properties/
   @property({ attribute: false }) public hass!: HomeAssistant;
 
   @state() private config!: FrameCardConfig;
+
+  public async getCardSize(): Promise<number> {
+    if (!this._card) {
+      return 0;
+    }
+
+    if (typeof this._card.getCardSize === 'function') {
+      return this._card.getCardSize();
+    }
+
+    return 1;
+  }
 
   // https://lit.dev/docs/components/properties/#accessors-custom
   public setConfig(config: FrameCardConfig): void {
@@ -68,34 +93,85 @@ export class FrameCard extends LitElement {
       name: 'FrameCard',
       ...config,
     };
-
-    this._el = html`
-      <fieldset>
-        <legend>${this.config?.label}</legend>
-      </fieldset>
-    `;
   }
 
-  // https://lit.dev/docs/components/lifecycle/#reactive-update-cycle-performing
-  protected shouldUpdate(changedProps: PropertyValues): boolean {
-    if (!this.config) {
-      return false;
-    }
+  private async _createCard() {
+    const ret = (await helpers).createCardElement(this.config?.card);
+    ret.hass = this.hass;
 
-    return hasConfigOrEntityChanged(this, changedProps, false);
+    return ret;
+  }
+
+  protected async updated(changedProps: PropertyValues) {
+    super.updated(changedProps);
+
+    if ( changedProps.has('config')) {
+      this._card = await this._createCard();
+      if (this._card) {
+        this._card.hass = this.hass;
+
+        this._el = html`
+          <div>
+            <fieldset>
+              <legend>${this.config?.label}</legend>
+              ${this._card}
+            </fieldset>
+          </div>
+        `;
+      }
+    }
   }
 
   // https://lit.dev/docs/components/rendering/
   protected render(): TemplateResult | void {
-    return html`
-      <ha-card>
-        ${this._el}
-      </ha-card>
-    `;
+    return this._el;
   }
 
   // https://lit.dev/docs/components/styles/
   static get styles(): CSSResultGroup {
-    return css``;
+    return css`
+        /* Defining a custom border on all
+            sides except the top side */
+        .custom-field {
+            border: 2px solid;
+        }
+
+        /* Defining the style of the
+        heading/legend for custom fieldset */
+        .custom-field span {
+            float: left;
+
+        }
+
+        /* Creating the custom top border to make
+            it look like fieldset defining small
+            border before the legend. The width
+            can be modified to change position
+            of the legend */
+        .custom-field span:before {
+            border-top: 4px solid;
+            content: ' ';
+            float: left;
+            margin: 8px 2px 0 -1px;
+            width: 12px;
+        }
+
+        /* Defining a long border after the
+        legend, using overflow hidden to
+        actually hide the line behind the
+        legend text. It can be removed
+        for a different effect */
+        .custom-field span:after {
+            border-top: 4px solid;
+            content: ' ';
+            display: block;
+            height: 24px;
+            left: 2px;
+            margin: 0 1px 0 0;
+            overflow: hidden;
+            position: relative;
+            top: 8px;
+        }
+    `;
   }
 }

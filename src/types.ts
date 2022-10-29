@@ -12,5 +12,5 @@ export interface FrameCardConfig extends LovelaceCardConfig {
   type: string;
   name?: string;
   label?: string;
-  card: LovelaceCard;
+  card: LovelaceCardConfig;
 }
